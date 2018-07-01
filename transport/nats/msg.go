@@ -29,7 +29,7 @@ type Error interface {
 	error
 
 	// Returns the short phrase depicting the classification of the error.
-	Code() int32
+	Code() uint32
 
 	// Returns the error details message.
 	Message() string
@@ -87,7 +87,7 @@ func WrapError(err error) *Status {
 	er, ok := err.(Error)
 
 	if !ok {
-		e.Code = int32(codes.Unknown)
+		e.Code = uint32(codes.Unknown)
 		e.Message = err.Error()
 		return e
 	}
