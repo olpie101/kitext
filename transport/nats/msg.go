@@ -1,8 +1,9 @@
 package nats
 
 import (
-	"fmt"
 	"strings"
+
+	"fmt"
 
 	"google.golang.org/grpc/codes"
 )
@@ -75,8 +76,14 @@ func (h Headers) Del(key string) {
 	delete(h, strings.ToLower(key))
 }
 
-//
-func (b *Status) Error() string { return fmt.Sprintf("(%v) %v", b.Code, b.Message) }
+func (s *Status) Err() error {
+	if s.Code != uint32(codes.OK) {
+		return transError{
+			c: s.Code,
+			m: s.Message,
+		}
+	}
+}
 
 func WrapError(err error) *Status {
 	if err == nil {
@@ -96,4 +103,21 @@ func WrapError(err error) *Status {
 	e.Message = er.Message()
 
 	return e
+}
+
+type transError struct {
+	c uint32
+	m string
+}
+
+func (e transError) Error() string {
+	return fmt.Sprintf("(%d) %s", e.c, e.m)
+}
+
+func (e transError) Code() uint32 {
+	return e.c
+}
+
+func (e transError) Message() string {
+	return e.m
 }
